@@ -43,8 +43,12 @@ class ViewController: UIViewController {
         let digit = sender.currentTitle!
         
         if userIsInTheMidleOfTyping {
-            let currentNumber = display.text!
-            display.text = currentNumber + digit
+            if displayValue - Double(Int(displayValue)) == 0.0 ||
+                digit != "." {
+                
+                let currentNumber = display.text!
+                display.text = currentNumber + digit
+            }
         }else{
             display.text = digit
         
