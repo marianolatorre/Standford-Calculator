@@ -12,14 +12,27 @@ import Foundation
 class CalculatorBrain{
 
     private var accumulator : Double = 0.0
+    private var internalProgram = [AnyObject]()
+    private var variableNames = Dictionary<String,Double>()
     
-    func setOperant(operand: Double) {
+    func setVariableValue (variableName :String, variableValue: Double) {
+        variableNames[variableName] = variableValue
+    }
+    
+    func setOperand(operand: Double) {
         accumulator = operand
+        internalProgram.append(operand)
+    }
+    
+    func setOperand(operand: String) {
+        accumulator = variableNames[operand] ?? 0.0
+        internalProgram.append(operand)
     }
     
     private var pendingBinaryOp : PendingBinaryOperation?
     
-    func performOperation (symbol: String) {
+    func performOperation (symbol: String) -> Bool{
+        internalProgram.append(symbol)
         if let operation = operations[symbol] {
             switch operation {
             case .Constant(let value): accumulator = value
@@ -30,8 +43,10 @@ class CalculatorBrain{
             case .Equals:
                 processPendingOperation()
             }
+            return true;
         }
-    
+        
+        return false;
     }
 
     private func processPendingOperation () {
@@ -70,9 +85,39 @@ class CalculatorBrain{
         var firstOperand : Double
     }
     
+    typealias PropertyList = AnyObject
+    
+    
+    
+    var program : PropertyList {
+        get{
+            return internalProgram
+        }
+        set {
+            reset()
+            
+            if let arrayOps = newValue as? [AnyObject] {
+                
+                for step in arrayOps {
+                    if let number = step as? Double {
+                        setOperand(number)
+                    }else if let op = step as? String {
+                        if !performOperation(op) {
+                            setOperand(op)
+                        }
+                    }
+                }
+                
+            }
+            
+        }
+    
+    }
+    
     func reset () {
         pendingBinaryOp = nil
         accumulator = 0.0
+        internalProgram.removeAll()
     }
     
     var result : Double {

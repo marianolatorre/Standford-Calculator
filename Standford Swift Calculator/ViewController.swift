@@ -36,7 +36,8 @@ class ViewController: UIViewController {
     @IBAction private func resetStatus(sender: UIButton) {
         userIsInTheMidleOfTyping = false
         displayValue = 0
-        brain = CalculatorBrain()
+        brain.reset()
+        savedProgram = nil
     }
     
     @IBAction private func digitPressed(sender: UIButton) {
@@ -55,13 +56,52 @@ class ViewController: UIViewController {
         }
         userIsInTheMidleOfTyping = true
     }
+    
+    var savedProgram : CalculatorBrain.PropertyList?
+    
+    @IBAction func save() {
+        performSave()
+    }
+    
+    @IBAction func restore() {
+        performProgram()
+    }
+    
+    @IBAction func assignValueToVar() {
+        brain.setVariableValue ("M", variableValue: displayValue)
+        performProgram()
+        userIsInTheMidleOfTyping = false
+    }
+    
+    
+    @IBAction func setVariableOperand() {
+        brain.setOperand("M")
+        userIsInTheMidleOfTyping = false
+        performSave()
+        performProgram()
+    }
+    
+    private func performSave() {
+        savedProgram = brain.program
+    }
+    
+    private func performProgram () {
+        if let program = savedProgram{
+            brain.program = program
+            displayValue = brain.result
+        }
+    }
+    
+    @IBAction func undo() {
+      
+    }
 
     private var brain = CalculatorBrain()
     
     @IBAction private func operationButtonPressed(sender: UIButton) {
         
         if userIsInTheMidleOfTyping {
-            brain.setOperant(displayValue)
+            brain.setOperand(displayValue)
             userIsInTheMidleOfTyping = false
         }
         
@@ -70,6 +110,8 @@ class ViewController: UIViewController {
         }
         
         displayValue = brain.result
+        
+        performSave()
     }
 }
 
